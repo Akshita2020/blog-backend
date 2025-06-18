@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
@@ -23,11 +24,15 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.0",
     "mysql2": "^3.14.1",
+    "npm-force-resolutions": "^0.0.10",
     "path": "^0.12.7",
     "sequelize": "^6.37.7",
-    "validator": "^13.9.0"
+    "validator": "13.9.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
+  },
+  "resolutions": {
+    "validator": "13.9.0"
   }
 }
