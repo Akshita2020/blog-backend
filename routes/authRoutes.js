@@ -39,7 +39,6 @@ router.post(
   authController.login
 );
 
-// Logout routes
 router.post("/logout", validateRefreshTokenForLogout, authController.logout);
 
 router.post("/logout-all", authenticateToken, authController.logoutAll);

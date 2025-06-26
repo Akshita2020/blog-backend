@@ -1,35 +1,34 @@
-const { Blog, User } = require("../models/index");
-const { Op } = require("sequelize");
-const { handleImageUpload, deleteImage } = require("../utils/handleImageUpload");
+const {Blog, User} = require('../models/index');
+const {Op} = require('sequelize');
+const {handleImageUpload, deleteImage} = require('../utils/handleImageUpload');
 
 const blogService = {
-
   getAllBlogs: async (page, limit, search) => {
     const offset = (page - 1) * limit;
 
     const whereClause = {
-      status: "active",
+      status: 'active',
       ...(search && {
         [Op.or]: [
-          { title: { [Op.like]: `%${search}%` } },
-          { shortDescription: { [Op.like]: `%${search}%` } },
+          {title: {[Op.like]: `%${search}%`}},
+          {shortDescription: {[Op.like]: `%${search}%`}},
         ],
       }),
     };
 
-    const { count, rows: blogs } = await Blog.findAndCountAll({
+    const {count, rows: blogs} = await Blog.findAndCountAll({
       where: whereClause,
       include: [
         {
           model: User,
-          as: "author",
-          attributes: ["id", "name", "email"],
+          as: 'author',
+          attributes: ['id', 'name', 'email'],
         },
       ],
-      attributes: ["id", "title", "shortDescription", "image", "createdAt"],
+      attributes: ['id', 'title', 'shortDescription', 'image', 'createdAt'],
       limit,
       offset,
-      order: [["createdAt", "DESC"]],
+      order: [['createdAt', 'DESC']],
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -48,16 +47,12 @@ const blogService = {
   },
 
   getBlogById: async (id, userId) => {
-    // Validate ID
     if (!id || isNaN(id)) {
-      throw new Error("Invalid blog ID");
+      throw new Error('Invalid blog ID');
     }
-
-    let whereClause = { id };
-
-    // If no user or not the owner, only show active blogs
+    let whereClause = {id};
     if (!userId) {
-      whereClause.status = "active";
+      whereClause.status = 'active';
     }
 
     const blog = await Blog.findOne({
@@ -65,19 +60,18 @@ const blogService = {
       include: [
         {
           model: User,
-          as: "author",
-          attributes: ["id", "name", "email"],
+          as: 'author',
+          attributes: ['id', 'name', 'email'],
         },
       ],
     });
 
     if (!blog) {
-      throw new Error("Blog not found");
+      throw new Error('Blog not found');
     }
 
-    // If blog is not active and user is not the owner, deny access
-    if (blog.status !== "active" && (!userId || blog.userId !== userId)) {
-      throw new Error("Blog not found");
+    if (blog.status !== 'active' && (!userId || blog.userId !== userId)) {
+      throw new Error('Blog not found');
     }
 
     return blog;
@@ -86,18 +80,18 @@ const blogService = {
   getUserBlogs: async (userId, page, limit) => {
     const offset = (page - 1) * limit;
 
-    const { count, rows: blogs } = await Blog.findAndCountAll({
-      where: { userId },
+    const {count, rows: blogs} = await Blog.findAndCountAll({
+      where: {userId},
       include: [
         {
           model: User,
-          as: "author",
-          attributes: ["id", "name", "email"],
+          as: 'author',
+          attributes: ['id', 'name', 'email'],
         },
       ],
       limit,
       offset,
-      order: [["createdAt", "DESC"]],
+      order: [['createdAt', 'DESC']],
     });
 
     const totalPages = Math.ceil(count / limit);
@@ -132,8 +126,8 @@ const blogService = {
       include: [
         {
           model: User,
-          as: "author",
-          attributes: ["id", "name", "email"],
+          as: 'author',
+          attributes: ['id', 'name', 'email'],
         },
       ],
     });
@@ -144,28 +138,28 @@ const blogService = {
   updateBlog: async (id, userId, updateData, file, req) => {
     // Validate ID
     if (!id || isNaN(id)) {
-      const error = new Error("Invalid blog ID");
-      error.field = "id";
+      const error = new Error('Invalid blog ID');
+      error.field = 'id';
       throw error;
     }
 
     const blog = await Blog.findByPk(id);
 
     if (!blog) {
-      const error = new Error("Blog not found");
-      error.field = "id";
+      const error = new Error('Blog not found');
+      error.field = 'id';
       throw error;
     }
 
     // Check if user owns this blog
     if (blog.userId !== userId) {
-      const error = new Error("You can only edit your own blogs");
-      error.field = "authorization";
+      const error = new Error('You can only edit your own blogs');
+      error.field = 'authorization';
       throw error;
     }
 
     // Handle image update
-    let imageUrl = blog.image; 
+    let imageUrl = blog.image;
 
     if (file) {
       // Delete old image if it exists
@@ -196,8 +190,8 @@ const blogService = {
       include: [
         {
           model: User,
-          as: "author",
-          attributes: ["id", "name", "email"],
+          as: 'author',
+          attributes: ['id', 'name', 'email'],
         },
       ],
     });
@@ -208,35 +202,35 @@ const blogService = {
   updateBlogStatus: async (id, userId, status) => {
     // Validate ID
     if (!id || isNaN(id)) {
-      throw new Error("Invalid blog ID");
+      throw new Error('Invalid blog ID');
     }
 
     // Validate status
-    if (!status || !["active", "inactive"].includes(status)) {
+    if (!status || !['active', 'inactive'].includes(status)) {
       throw new Error("Status must be either 'active' or 'inactive'");
     }
 
     // Find blog
     const blog = await Blog.findByPk(id);
     if (!blog) {
-      throw new Error("Blog not found");
+      throw new Error('Blog not found');
     }
 
     // Check ownership
     if (blog.userId !== userId) {
-      throw new Error("Not authorized to update this blog");
+      throw new Error('Not authorized to update this blog');
     }
 
     // Update status only
-    await blog.update({ status });
+    await blog.update({status});
 
     // Fetch updated blog with author
     const updatedBlog = await Blog.findByPk(id, {
       include: [
         {
           model: User,
-          as: "author",
-          attributes: ["id", "name", "email"],
+          as: 'author',
+          attributes: ['id', 'name', 'email'],
         },
       ],
     });
@@ -245,11 +239,11 @@ const blogService = {
   },
 
   deleteBlog: async (id, userId, req) => {
-    const blog = await Blog.findOne({ where: { id, userId } });
+    const blog = await Blog.findOne({where: {id, userId}});
 
     if (!blog) {
       throw new Error(
-        "Blog not found or you are not authorized to delete this blog"
+        'Blog not found or you are not authorized to delete this blog',
       );
     }
 
@@ -264,25 +258,25 @@ const blogService = {
   searchBlogs: async (query, page, limit) => {
     const offset = (page - 1) * limit;
 
-    const { count, rows: blogs } = await Blog.findAndCountAll({
+    const {count, rows: blogs} = await Blog.findAndCountAll({
       where: {
-        status: "active",
+        status: 'active',
         [Op.or]: [
-          { title: { [Op.like]: `%${query}%` } },
-          { shortDescription: { [Op.like]: `%${query}%` } },
-          { description: { [Op.like]: `%${query}%` } },
+          {title: {[Op.like]: `%${query}%`}},
+          {shortDescription: {[Op.like]: `%${query}%`}},
+          {description: {[Op.like]: `%${query}%`}},
         ],
       },
       include: [
         {
           model: User,
-          as: "author",
-          attributes: ["id", "name", "email"],
+          as: 'author',
+          attributes: ['id', 'name', 'email'],
         },
       ],
       limit,
       offset,
-      order: [["createdAt", "DESC"]],
+      order: [['createdAt', 'DESC']],
     });
 
     return {

@@ -5,7 +5,6 @@ const { User, RefreshToken } = models;
 const { generateToken, generateRefreshToken } = require("../utils/jwt");
 
 const authService = {
-  // Helper function to extract device info
   _extractDeviceInfo: (req) => {
     const userAgent = req?.headers?.["user-agent"] || "Unknown Device";
     const ipAddress = req?.ip || req?.connection?.remoteAddress || "Unknown IP";
@@ -16,7 +15,6 @@ const authService = {
     };
   },
 
-  // Register a new user
   registerUser: async (userData, req = null) => {
     const { name, email, password } = userData;
 
@@ -45,7 +43,6 @@ const authService = {
       Date.now() + 7 * 24 * 60 * 60 * 1000
     );
 
-    // Fix: Use authService instead of this
     const deviceInfo = authService._extractDeviceInfo(req);
 
     await RefreshToken.create({
@@ -229,7 +226,6 @@ const authService = {
       action: "SECURE_LOGOUT",
     };
 
-    // Mark token as inactive instead of destroying for audit purposes
     await tokenRecord.update({ isActive: false });
 
     return {
