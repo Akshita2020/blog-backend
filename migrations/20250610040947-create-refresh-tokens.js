@@ -2,7 +2,7 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("refresh_tokens", {
+    await queryInterface.createTable("RefreshToken", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -20,7 +20,7 @@ module.exports = {
         onDelete: "CASCADE",
       },
       refreshToken: {
-        type: Sequelize.STRING(500), 
+        type: Sequelize.STRING(500),
         allowNull: false,
         unique: true,
       },
@@ -38,14 +38,14 @@ module.exports = {
       },
     });
 
-    await queryInterface.addIndex("refresh_tokens", ["refreshToken"], {
+    await queryInterface.addIndex("RefreshToken", ["refreshToken"], {
       unique: true,
     });
 
-    await queryInterface.addIndex("refresh_tokens", ["userId"]);
+    await queryInterface.addIndex("RefreshToken", ["userId"]);
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("refresh_tokens");
+    await queryInterface.dropTable("RefreshToken");
   },
 };
